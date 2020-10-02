@@ -1,10 +1,18 @@
 from flask import *
-from flask_socketio import *
+# from flask_socketio import *
+from flask_socketio import SocketIO, send, emit
 
-# Init the server
+import takeoff
+import mission
+import land
+
+# ================== Init the server ==============
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'some super secret key!'
 socketio = SocketIO(app, logger=True)
+
+
+# ================ app route =======================
 
 # Send HTML!
 @app.route('/')
@@ -28,13 +36,47 @@ def user_id(id):
 def html(username):
     return render_template('index.html', username=username)
 
+
+# ============ socket event handler =================
+
+
+@socketio.on('connect')
+def test_connect():
+    emit('connected', {'data': 'Connected'})
+
+@socketio.on('disconnect')
+def test_disconnect():
+    print('Client disconnected')
+
 # Receive a message from the front end HTML
 @socketio.on('send_message')   
 def message_recieved(data):
-    print(data['text'])
-    emit('message_from_server', {'text':'Message recieved!'})
+    msg = data['text']
+    print(">>>>>> got: "+ msg + " <<<<<<<<<<")
+    emit('message_from_server', {'text':'Recieved message : '+msg} , broadcast=True)
+
+@socketio.on('drone_takeoff')
+def drone_takeoff(data):
+    print('>>> to takeoff ...')
+    emit('message_from_server', {'text':'Recieved message : takeoff'} , broadcast=True)
+    takeoff.main()
+
+
+@socketio.on('drone_mission')
+def drone_mission(data):
+    print('>>> to run mission ...')
+    emit('message_from_server', {'text':'Recieved message : mission'} , broadcast=True)
+
+
+@socketio.on('drone_land')
+def drone_land(data):
+    print('>>> to landing ...')
+    emit('message_from_server', {'text':'Recieved message : landing'} , broadcast=True)
+
+
+# ================ main ================================
 
 # Actually Start the App
 if __name__ == '__main__':
     """ Run the app. """    
-    socketio.run(app, port=8000, debug=True)
+    socketio.run(app, host='0.0.0.0', port=8000, debug=False)

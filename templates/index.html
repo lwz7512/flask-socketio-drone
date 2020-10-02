@@ -1,15 +1,14 @@
 <html>
     <head>
         <!-- Some basic meta info -->
-        <title>Example</title>
+        <title>Flask Socket.io</title>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1.0, user-scalable=no" />
         <!-- A stylesheet to make things automatically look nice -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.min.css">
 
         <!-- Link to the socket.io info -->
-        <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
         <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
 
         <!-- Script to handle socket.io -->
@@ -25,7 +24,7 @@
                     var text = document.getElementById("textfield_input").value;
 
                     // Update the chat window
-                    document.getElementById("chat").innerHTML += "You: " + text + "\n\n";                    
+                    // document.getElementById("chat").innerHTML += "You: " + text + "\n\n";                    
                     
                     // Emit a message to the 'send_message' socket
                     socket.emit('send_message', {'text':text});
@@ -37,21 +36,62 @@
                 // Message recieved from server
                 socket.on('message_from_server', function(data) {
                     var text = data['text'];
-                    document.getElementById("chat").innerHTML += "Server: " + text + "\n\n";   
+                    document.getElementById("chat").innerHTML += "Server: " + text + "\r";  
                 });
+                // connected
+                socket.on("connected", function(data){
+                    console.log('socket created!')
+                });
+                // take off
+                $('#takeoff_button').on("click", function(){
+                    console.log('>>> take off ...')
+                    socket.emit('drone_takeoff', {});
+                });
+                // mission
+                $('#mission_button').on("click", function(){
+                    console.log('>>> mission running ...')
+                    socket.emit('drone_mission', {});
+                })
+                // landing
+                $('#land_button').on("click", function(){
+                    console.log('>>> landing ...')
+                    socket.emit('drone_land', {});
+                })
             });
         </script>
+        <style>
+            .message-box {
+                width: 320px; height: 250px; 
+                font-size: 12px; font-family: monospace; 
+                margin-top: 10px;
+                margin-bottom: 20px;
+            }
+            .im-btn {
+                margin-top: 5px; 
+                margin-right: 20px;
+                width: 90px; 
+                height: 30px; 
+            }
+            .msg-input {
+                height: 30px; width: 400px; margin-top: 5px; margin-right: 10px;
+            }
+        </style>
     </head>
 
 <body>
     <div style="margin: 25px; display: flex; flex-direction: column;">
         <h1 class="title">Hello {{username}}.</h1>
-        <p>Welcome to the flask quick start example.</p>                        
-        <textarea id="chat" style="width: 500px; height: 250px; font-size: 18px; font-family: monospace; margin-top: 10px;"></textarea>                 
-        <div style="display: flex; flex-direction: row;">
-            <input type="text" id="textfield_input" style="height: 30px; width: 400px; margin-top: 5px; margin-right: 10px;" class="textfield"> 
-            <button id="send_button" class="button is-primary" style="margin-top: 5px; width: 90px; height: 30px;">Send</button>
+        <p>Welcome to the drone controlling example.</p>
+        <textarea id="chat" class="message-box" ></textarea>
+        <div style="display: flex; flex-direction: row;margin-bottom: 20px;">
+            <input type="text" id="textfield_input" class="textfield msg-input" placeholder="say something">
+            <button id="send_button" class="button is-primary im-btn" >Send</button>
         </div>
-    </div>        
+        <div style="display: flex; flex-direction: row;">
+            <button id="takeoff_button" class="button is-success im-btn" >Take off</button>
+            <button id="mission_button" class="button is-warning im-btn" >Mission</button>
+            <button id="land_button" class="button is-info im-btn" >Land</button>
+        </div>
+    </div>
 </body>
 </html>
