@@ -66,12 +66,14 @@ def drone_takeoff(data):
 def drone_mission(data):
     print('>>> to run mission ...')
     emit('message_from_server', {'text':'Recieved message : mission'} , broadcast=True)
+    mission.main()
 
 
 @socketio.on('drone_land')
 def drone_land(data):
     print('>>> to landing ...')
     emit('message_from_server', {'text':'Recieved message : landing'} , broadcast=True)
+    land.main()
 
 
 # ================ main ================================
